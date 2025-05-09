@@ -4,6 +4,7 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 3001;
+const mongoose = require("mongoose");
 
 app.use(cors());
 app.use(express.json());
@@ -36,30 +37,33 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+   // Working With MongoDB
+   const database = client.db("TechnoNews");
+   const tests = database.collection("test");
 
-// Working With MongoDB
-const database = client.db('TechnoNews');
-const tests = database.collection('test');
 
 
-// Test database
-app.post('/post',async (req,res) =>{
-   const test = req.body;
-   try{
-     const result = await tests.insertOne(test);
-     res.send(result)
-   }catch (error){
-     console.error("error in add news",error)
-     res.status(500).send({massage:"error inserting data"})
+// Test
+app.post('/test',async (req,res) =>{
+   const Test = req.body;
+   console.log(Test);
+   try {
+     const result = await tests.insertOne(Test);
+     console.log(result.insertedId);
+     res.send(result);
+   }catch(error){
+     console.error("error in add review",error);
+     res.status(500).send({massage:'Error inserting data'}) 
    }
- })
+ });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+   //  await client.close();
+   await client.connect()
   }
 }
 run().catch(console.dir);

@@ -1,21 +1,76 @@
-my server is connect in mongodb what is the provlem and why the code is not go in database
+why the data is not send to database
+
 code => 
-// Working With MongoDB
-const database = client.db('TechnoNews');
-const tests = database.collection('test');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
+const port = process.env.PORT || 3001;
+const mongoose = require("mongoose");
+
+app.use(cors());
+app.use(express.json());
 
 
-// Test database
-app.post('/post',async (req,res) =>{
-   const test = req.body;
-   try{
-     const result = await tests.insertOne(test);
-     res.send(result)
-   }catch (error){
-     console.error("error in add news",error)
-     res.status(500).send({massage:"error inserting data"})
+app.get('/',(req,res)=>{
+   res.send('Server is running');
+});
+
+app.listen(port, ()=>{
+   console.log(`Express is listening port ${port}`);
+});
+
+// mongodb connection
+console.log(`${process.env.DB_USER},${process.env.DB_PASSWORD}`);
+
+
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.hesexcu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+async function run() {
+  try {
+    await client.connect();
+   // Working With MongoDB
+   const database = client.db("TechnoNews");
+   const tests = database.collection("test");
+
+
+
+// Test
+app.post('/test',async (req,res) =>{
+   const Test = req.body;
+   console.log(Test);
+   try {
+     const result = await tests.insertOne(Test);
+     console.log(`----- the result ----${result.insertedId}`);
+     res.send(result);
+   }catch(error){
+     console.error("error in add review",error);
+     res.status(500).send({massage:'Error inserting data'}) 
    }
- })
+ });
+
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
+
+
 
 Error => 
 [nodemon] restarting due to changes...
@@ -23,14 +78,17 @@ Error =>
 TechnoNews,E64Ub4maPlDENeNZ
 Express is listening port 3001
 Pinged your deployment. You successfully connected to MongoDB!
-error in add news TypeError: Cannot read properties of undefined (reading '_id')
-    at transform (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/utils.js:1075:17)
-    at Array.map (<anonymous>)
-    at maybeAddIdToDocuments (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/utils.js:1080:49)
-    at new InsertOneOperation (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/operations/insert.js:43:73)
-    at Collection.insertOne (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/collection.js:157:77)
-    at /home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/index.js:44:33
+{ name: 'Test' }
+error in add review MongoNotConnectedError: Client must be connected before running operations
+    at autoConnect (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/operations/execute_operation.js:95:19)
+    at executeOperation (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/operations/execute_operation.js:38:40)
+    at Collection.insertOne (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/mongodb/lib/collection.js:157:63)
+    at /home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/index.js:51:33
     at Layer.handleRequest (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/lib/layer.js:152:17)
     at next (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/lib/route.js:157:13)
     at Route.dispatch (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/lib/route.js:117:3)
     at handle (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/lib/layer.js:152:17)
+    at /home/ashraful-pathan/Project/ProgramingHero/TechnoNews/server/node_modules/router/index.js:295:15 {
+  errorLabelSet: Set(0) {}
+}
